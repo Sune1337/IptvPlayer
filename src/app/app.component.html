@@ -1,12 +1,24 @@
-<p-menubar [model]="items">
-  <ng-template pTemplate="start">
-    <img src="assets/iptv-32.png" alt="IPTV icon">
-  </ng-template>
+<ng-container *ngIf="componentState | async as componentState">
+  <p-menubar [model]="items" [formGroup]="formGroup">
+    <ng-template pTemplate="start">
+      <img src="assets/iptv-32.png" alt="IPTV icon">
+    </ng-template>
 
-  <ng-template pTemplate="end">
-    <div class="flex align-items-center gap-2">
-      <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto"/>
+    <ng-template pTemplate="end">
+      <div class="flex align-items-center gap-2">
+        <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" formControlName="search" (change)="whenSearchChange($event)" (focus)="whenSearchChange($event)"/>
+      </div>
+    </ng-template>
+  </p-menubar>
+
+  <p-overlayPanel #searchPanel [style]="{ width: '95%' }" [showCloseIcon]="true">
+    <div class="flex flex-wrap justify-content-between">
+      <div class="title-box" *ngFor="let title of componentState.searchResults; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
+        <img class="title-thumbnail" *ngIf="title.thumbnailUrl" [src]="title.thumbnailUrl">
+        <p>{{ title.name }}</p>
+      </div>
     </div>
-  </ng-template>
-</p-menubar>
-<router-outlet></router-outlet>
+  </p-overlayPanel>
+
+  <router-outlet></router-outlet>
+</ng-container>

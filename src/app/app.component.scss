@@ -1,0 +1,16 @@
+::ng-deep .p-overlaypanel-content {
+  overflow: auto;
+  height: 90vh;
+}
+
+.title-box {
+  width: 15rem;
+  height: 25rem;
+  cursor: pointer;
+}
+
+.title-thumbnail {
+  object-fit: contain;
+  width: 100%;
+  height: 19rem;
+}

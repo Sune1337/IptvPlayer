@@ -1,6 +1,6 @@
 import { AccountSettings } from './models/account-settings';
 import { ReplaySubject } from 'rxjs';
-import { liveQuery } from 'dexie';
+import Dexie, { liveQuery } from 'dexie';
 import { iptvDb } from './iptv-db';
 import { Injectable } from '@angular/core';
 import { Channel } from './models/channel';
@@ -52,6 +52,35 @@ export class IptvDbService {
       await iptvDb.titles.bulkDelete(remove);
     });
   }
+
+  public search = async (terms: string[]): Promise<Title[]> => {
+    if (terms.length == 0){
+      return [];
+    }
+
+    return iptvDb.transaction('r', iptvDb.titles, async function () {
+        // Parallel search for all prefixes - just select resulting primary keys
+        const results = await Dexie.Promise.all(
+          terms.map(prefix =>
+            iptvDb.titles
+              .where('terms')
+              .startsWith(prefix)
+              .primaryKeys())
+        );
+
+        // Intersect result set of primary keys
+        const reduced = results
+          .reduce((a, b) => {
+            const set = new Set(b);
+            return a.filter(k => set.has(k));
+          });
+
+        // Finally select entire documents from intersection
+        return iptvDb.titles.where(':id').anyOf(reduced).limit(100).toArray();
+      }
+    );
+  }
+
 
   private processAccountSettings = async (accountSettings?: AccountSettings): Promise<void> => {
     if (!accountSettings) {

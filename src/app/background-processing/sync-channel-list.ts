@@ -6,6 +6,7 @@ import { parse } from 'iptv-playlist-parser';
 import { Title } from '../db/models/title';
 import { Channel } from '../db/models/channel';
 import { FullMatch } from '../utils/full-match';
+import { tokenize } from '../utils/tokenize';
 
 export class SyncChannelList {
 
@@ -71,7 +72,7 @@ export class SyncChannelList {
       if (!title) {
         title = titles[titleName] = { name: playlistItem.name, thumbnailUrl: playlistItem.tvg.logo, titleChannelUrls: [], terms: [], addedDateUtc: new Date() };
       }
-      title.terms = this.tokenize(title.name);
+      title.terms = tokenize(title.name);
       title.titleChannelUrls.push({ channelName: channel.name, url: playlistItem.url });
     }
 
@@ -131,18 +132,5 @@ export class SyncChannelList {
 
     await this.iptvDbService.batchTitles(addTitles, updateTitles, removeTitles);
     abortController.signal.throwIfAborted();
-  }
-
-  private tokenize = (text: string): Array<string> => {
-    const words = new Set<string>();
-    const segmenter = new Intl.Segmenter(navigator.language, { granularity: 'word' });
-    for (let { index, segment, isWordLike } of segmenter.segment(text)) {
-      if (isWordLike) {
-        let word = segment.toLowerCase();
-        words.add(word);
-      }
-    }
-
-    return Array.from(words);
   }
 }

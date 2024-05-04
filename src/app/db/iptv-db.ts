@@ -15,7 +15,7 @@ export class IptvDb extends Dexie {
       .stores({
         accountSettings: '++id',
         channels: '++id, name',
-        titles: '++id, name, terms'
+        titles: '++id, name, *terms'
       });
   }
 }
