@@ -2,7 +2,15 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.6.
 
+## Generate Angular project
 `npx @angular/cli@17 new iptv-player`
+
+## Use PrimeNG
+```shell
+npm install --save primeng@17
+npm install --save primeflex@3
+npm install --save primeicons@7
+```
 
 ## Development server
 
