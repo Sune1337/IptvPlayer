@@ -17,6 +17,11 @@ npm install --save primeicons@7
 npm install --save dexie@4
 ```
 
+## Generate web-worker for background processing.
+```shell
+npx ng generate web-worker background-processing/app
+```
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.

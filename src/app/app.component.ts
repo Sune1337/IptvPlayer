@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
+import { WebWorkerService } from './background-processing/webworker-service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,12 @@ import { InputTextModule } from 'primeng/inputtext';
 })
 export class AppComponent {
   title = 'IPTV player';
+
+  constructor(
+    private webWorkerService: WebWorkerService
+  ) {
+    this.webWorkerService.syncChannelList();
+  }
 
   public items: MenuItem[] = [
     { label: "Watch", routerLink: '/watch' },
