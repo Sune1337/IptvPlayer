@@ -12,6 +12,11 @@ npm install --save primeflex@3
 npm install --save primeicons@7
 ```
 
+## Use Dexie for IndexDB access
+```shell
+npm install --save dexie@4
+```
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.

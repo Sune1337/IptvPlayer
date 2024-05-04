@@ -1,1 +1,8 @@
-<p>settings works!</p>
+<div [formGroup]="formGroup">
+  <div class="flex flex-column gap-2">
+    <label for="playlistUrlInput">IPTV Url</label>
+    <input id="playlistUrlInput" type="text" pInputText formControlName="playlistUrl"/>
+  </div>
+</div>
+
+<p-button styleClass="mt-5" (onClick)="whenSaveClick()" label="Save"></p-button>
