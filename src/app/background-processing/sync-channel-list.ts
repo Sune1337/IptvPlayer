@@ -7,6 +7,7 @@ import { Title } from '../db/models/title';
 import { Channel } from '../db/models/channel';
 import { FullMatch } from '../utils/full-match';
 import { tokenize } from '../utils/tokenize';
+import { compareArrays } from '../utils/compare-arrays';
 
 export class SyncChannelList {
 
@@ -124,9 +125,18 @@ export class SyncChannelList {
           removeTitles.push(titlesMatch.current[0].id);
         }
       } else {
-        // Title was updated.
-        titlesMatch.current[1].id = titlesMatch.current[0].id;
-        updateTitles.push(titlesMatch.current[1]);
+        // Compare items
+        const isChanged =
+          titlesMatch.current[0].name != titlesMatch.current[1].name ||
+          titlesMatch.current[0].thumbnailUrl != titlesMatch.current[1].thumbnailUrl ||
+          !compareArrays(titlesMatch.current[0].titleChannelUrls, titlesMatch.current[1].titleChannelUrls, (a, b) => a.url == b.url || a.channelName == b.channelName) ||
+          !compareArrays(titlesMatch.current[0].terms, titlesMatch.current[1].terms, (a, b) => a == b);
+
+        if (isChanged) {
+          // Title was updated.
+          titlesMatch.current[1].id = titlesMatch.current[0].id;
+          updateTitles.push(titlesMatch.current[1]);
+        }
       }
     }
 
