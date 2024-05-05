@@ -54,7 +54,7 @@ export class IptvDbService {
   }
 
   public search = async (terms: string[]): Promise<Title[]> => {
-    if (terms.length == 0){
+    if (terms.length == 0) {
       return [];
     }
 
@@ -81,6 +81,9 @@ export class IptvDbService {
     );
   }
 
+  public getTitle = async (titleId: number): Promise<Title | undefined> => {
+    return iptvDb.titles.get(titleId);
+  }
 
   private processAccountSettings = async (accountSettings?: AccountSettings): Promise<void> => {
     if (!accountSettings) {

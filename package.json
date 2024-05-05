@@ -24,6 +24,7 @@
     "primeicons": "^7.0.0",
     "primeng": "^17.16.0",
     "rxjs": "~7.8.0",
+    "shaka-player": "^4.8.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },

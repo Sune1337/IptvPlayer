@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
@@ -36,6 +36,7 @@ export class AppComponent {
   public componentState = new BehaviorSubject<ComponentState>(this._componentState);
 
   constructor(
+    private router: Router,
     private iptvDbService: IptvDbService,
     // Referencing the web-worker makes it start.
     private webWorkerService: WebWorkerService
@@ -62,6 +63,7 @@ export class AppComponent {
   }
 
   public selectTitle = (title: Title): void => {
+    this.router.navigate(['watch', title.id]);
     this.searchPanel.hide();
   }
 

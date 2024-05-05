@@ -22,6 +22,19 @@ npm install --save dexie@4
 npx ng generate web-worker background-processing/app
 ```
 
+## Video-player
+```shell
+npm install --save shaka-player@4
+```
+
+## Open in MPV
+https://github.com/b01o/mpv-url-proto/blob/main/mpv-url-proto-install.bat
+
+note: the generated "open_in_mpv.bat" needs to be changed to:
+```shell
+start "mpv" "C:\Users\linkri\Downloads\mpv-x86_64-v3-20240505-git-c4b6d0d\mpv.exe" "%u:~4%"
+```
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
