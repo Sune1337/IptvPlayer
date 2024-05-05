@@ -1,4 +1,5 @@
 export interface AccountSettings {
   id?: number;
-  playlistUrl: string;
+  playlistUrl?: string;
+  tmdbAccessToken?: string;
 }

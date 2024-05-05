@@ -4,6 +4,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { AccountSettings } from '../db/models/account-settings';
 
 @Component({
   selector: 'app-settings',
@@ -17,6 +18,7 @@ export class SettingsComponent implements OnDestroy {
   // Form controls.
   public formGroup: FormGroup;
   public playlistUrlControl: FormControl<string | null>;
+  public tmdbAccessTokenControl: FormControl<string | null>;
 
   // Keep track of subscriptions to clean up when component destroys.
   private ngUnsubscribe = new Subject<void>();
@@ -27,13 +29,19 @@ export class SettingsComponent implements OnDestroy {
     // Setup form-controls.
     this.formGroup = new FormGroup({
       id: new FormControl<number | undefined>(undefined),
-      playlistUrl: this.playlistUrlControl = new FormControl('')
+      playlistUrl: this.playlistUrlControl = new FormControl(''),
+      tmdbAccessToken: this.tmdbAccessTokenControl = new FormControl('')
     });
 
     // Subscript to settings from db.
     iptvDbService.accountSettings
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(accountSettings => {
+      .subscribe(dbAccountSettings => {
+          const accountSettings: AccountSettings = {
+            playlistUrl: '',
+            tmdbAccessToken: '',
+            ...dbAccountSettings
+          };
           this.formGroup.setValue(accountSettings);
         }
       )

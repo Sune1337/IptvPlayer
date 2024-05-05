@@ -3,6 +3,11 @@
     <label for="playlistUrlInput">IPTV Url</label>
     <input id="playlistUrlInput" type="text" pInputText formControlName="playlistUrl"/>
   </div>
+
+  <div class="flex flex-column gap-2">
+    <label for="tmdbAccessTokenInput">TMDB Access token</label>
+    <input id="tmdbAccessTokenInput" type="text" pInputText formControlName="tmdbAccessToken"/>
+  </div>
 </div>
 
 <p-button styleClass="mt-5" (onClick)="whenSaveClick()" label="Save"></p-button>

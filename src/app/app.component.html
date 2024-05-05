@@ -1,4 +1,4 @@
-<ng-container *ngIf="componentState | async as componentState">
+<ng-container>
   <p-menubar [model]="items" [formGroup]="formGroup">
     <ng-template pTemplate="start">
       <img src="assets/iptv-32.png" alt="IPTV icon">
@@ -13,8 +13,11 @@
 
   <p-overlayPanel #searchPanel [style]="{ width: '95%' }" [showCloseIcon]="true">
     <div class="flex flex-wrap justify-content-between">
-      <div class="title-box" *ngFor="let title of componentState.searchResults; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
-        <img class="title-thumbnail" *ngIf="title.thumbnailUrl" [src]="title.thumbnailUrl">
+      <div class="title-box" *ngFor="let title of searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
+        <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">
+        <ng-template #elseImg>
+          <img *ngIf="title.tmdb?.posterPath" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
+        </ng-template>
         <p>{{ title.name }}</p>
       </div>
     </div>

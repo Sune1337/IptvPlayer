@@ -8,6 +8,7 @@ import { Channel } from '../db/models/channel';
 import { FullMatch } from '../utils/full-match';
 import { tokenize } from '../utils/tokenize';
 import { compareArrays } from '../utils/compare-arrays';
+import { SyncTmdb } from './sync-tmdb';
 
 export class SyncChannelList {
 
@@ -46,6 +47,10 @@ export class SyncChannelList {
       }
 
       throw error;
+    }
+
+    if (!accountSettings.playlistUrl) {
+      return;
     }
 
     console.log('Download playlist.');
@@ -106,10 +111,7 @@ export class SyncChannelList {
     console.log('Save titles.');
 
     // Get all current titles.
-    const dbTitles = await firstValueFrom(
-      this.iptvDbService.titles
-        .pipe(takeUntil(abortSubject))
-    );
+    const dbTitles = await this.iptvDbService.getAllTitles();
 
     const titlesMatch = new FullMatch(dbTitles, Object.entries(titles).map(([_, title]) => title), c => c.name);
     const addTitles: Title[] = [];
@@ -142,5 +144,9 @@ export class SyncChannelList {
 
     await this.iptvDbService.batchTitles(addTitles, updateTitles, removeTitles);
     abortController.signal.throwIfAborted();
+
+    // Sync TMDB information.
+    const syncTmdb = new SyncTmdb(this.iptvDbService, accountSettings, abortController, abortSubject);
+    await syncTmdb.sync();
   }
 }

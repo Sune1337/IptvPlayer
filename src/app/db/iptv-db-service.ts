@@ -5,6 +5,7 @@ import { iptvDb } from './iptv-db';
 import { Injectable } from '@angular/core';
 import { Channel } from './models/channel';
 import { Title } from './models/title';
+import { Genre } from './models/genre';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +13,12 @@ import { Title } from './models/title';
 export class IptvDbService {
   public accountSettings = new ReplaySubject<AccountSettings>(1);
   public channels = new ReplaySubject<Channel[]>(1);
-  public titles = new ReplaySubject<Title[]>(1);
+  public genres = new ReplaySubject<Genre[]>(1);
 
   // Subscriptions used by the service.
   private accountSettingsSubscription;
   private channelsSubscription;
-  private titlesSubscription;
+  private genresSubscription;
 
   constructor() {
     this.accountSettingsSubscription = liveQuery(() => iptvDb.accountSettings.orderBy('id').first())
@@ -26,8 +27,8 @@ export class IptvDbService {
     this.channelsSubscription = liveQuery(() => iptvDb.channels.orderBy('name').toArray())
       .subscribe(channels => this.processChannels(channels));
 
-    this.titlesSubscription = liveQuery(() => iptvDb.titles.orderBy('name').toArray())
-      .subscribe(titles => this.processTitles(titles));
+    this.genresSubscription = liveQuery(() => iptvDb.genres.orderBy('id').toArray())
+      .subscribe(genres => this.processGenres(genres));
   }
 
   public saveAccountSettings = async (accountSettings: AccountSettings): Promise<void> => {
@@ -50,6 +51,17 @@ export class IptvDbService {
       await iptvDb.titles.bulkAdd(add);
       await iptvDb.titles.bulkPut(update);
       await iptvDb.titles.bulkDelete(remove);
+    });
+  }
+
+  public putTitle = async (title: Title): Promise<void> => {
+    await iptvDb.titles.put(title);
+  }
+
+  public batchGenres = async (add: Genre[], remove: number[]): Promise<void> => {
+    iptvDb.transaction('rw', iptvDb.genres, async () => {
+      await iptvDb.genres.bulkAdd(add);
+      await iptvDb.genres.bulkDelete(remove);
     });
   }
 
@@ -85,6 +97,16 @@ export class IptvDbService {
     return iptvDb.titles.get(titleId);
   }
 
+  public getAllTitles = async (): Promise<Title[]> => {
+    return iptvDb.titles.orderBy('id').toArray()
+  }
+
+  public getTitlesWithoutTmdb = async (): Promise<Title[]> => {
+    return iptvDb.titles
+      .filter(title => title.tmdb == null)
+      .toArray();
+  }
+
   private processAccountSettings = async (accountSettings?: AccountSettings): Promise<void> => {
     if (!accountSettings) {
       return;
@@ -97,8 +119,8 @@ export class IptvDbService {
     this.channels.next(channels);
   }
 
-  private processTitles = async (titles: Title[]): Promise<void> => {
-    this.titles.next(titles);
+  private processGenres = async (genres: Genre[]): Promise<void> => {
+    this.genres.next(genres);
   }
 
   private addAccountSettings = async (accountSettings: AccountSettings): Promise<void> => {
