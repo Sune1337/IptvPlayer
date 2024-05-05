@@ -137,6 +137,7 @@ export class SyncChannelList {
         if (isChanged) {
           // Title was updated.
           titlesMatch.current[1].id = titlesMatch.current[0].id;
+          titlesMatch.current[1].tmdb = titlesMatch.current[0].tmdb;
           updateTitles.push(titlesMatch.current[1]);
         }
       }
