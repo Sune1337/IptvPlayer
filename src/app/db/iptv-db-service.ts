@@ -107,7 +107,7 @@ export class IptvDbService {
           .where(':id')
           .anyOf(result)
           .offset(offset)
-          .limit(100)
+          .limit(limit)
           .toArray();
       }
     );

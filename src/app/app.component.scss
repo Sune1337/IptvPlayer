@@ -1,6 +1,13 @@
 ::ng-deep .p-overlaypanel-content {
+  width: calc(100vw - 3rem);
+  height: calc(100vh - 6rem);
+}
+
+.search-result-container {
+  display: flex;
+  flex-flow: column;
   overflow: auto;
-  height: 90vh;
+  height: 100%;
 }
 
 .title-box {

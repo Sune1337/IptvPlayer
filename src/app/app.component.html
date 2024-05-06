@@ -6,30 +6,41 @@
 
     <ng-template pTemplate="end">
       <div class="flex align-items-center gap-2">
-        <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" formControlName="search" (change)="whenSearchChange($event)" (focus)="whenSearchChange($event)"/>
+        <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" formControlName="search" (change)="whenSearchChange($event)" (focus)="whenSearchFocus($event)"/>
       </div>
     </ng-template>
   </p-menubar>
 
-  <p-overlayPanel #searchPanel [style]="{ width: '95%' }" [showCloseIcon]="true">
-    <div class="flex mb-3">
-      <div *ngFor="let genre of genres; let i = index" class="flex mr-2">
-        <p-checkbox #genre
-                    [value]="genre.id"
-                    [label]="genre.name"
-                    (onChange)="whenSearchChange()"
-        />
+  <p-overlayPanel #searchPanel>
+    <ng-template pTemplate="content">
+      <div #searchResultContainer class="search-result-container" infinite-scroll [scrollWindow]="false" (scrolled)="whenScrollSearchResult($event)">
+        <div>
+          <div class="mb-3 flex flex-wrap">
+            <div *ngFor="let genre of genres; let i = index" class="mr-2">
+              <p-checkbox #genre
+                          [value]="genre.id"
+                          [label]="genre.name"
+                          (onChange)="whenSearchChange()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div>
+            <div class="flex flex-wrap justify-content-between">
+              <div class="title-box" *ngFor="let title of searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
+                <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">
+                <ng-template #elseImg>
+                  <img *ngIf="title.tmdb?.posterPath" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
+                </ng-template>
+                <p>{{ title.name }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="flex flex-wrap justify-content-between">
-      <div class="title-box" *ngFor="let title of searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
-        <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">
-        <ng-template #elseImg>
-          <img *ngIf="title.tmdb?.posterPath" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
-        </ng-template>
-        <p>{{ title.name }}</p>
-      </div>
-    </div>
+    </ng-template>
   </p-overlayPanel>
 
   <router-outlet></router-outlet>

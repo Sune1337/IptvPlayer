@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewChildren } from '@angular/core';
+import { Component, ElementRef, ViewChild, ViewChildren } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
 import { MenuItem } from 'primeng/api';
@@ -13,11 +13,12 @@ import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { Genre } from './db/models/genre';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { Checkbox, CheckboxModule } from 'primeng/checkbox';
+import { IInfiniteScrollEvent, InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenubarModule, InputTextModule, ReactiveFormsModule, OverlayPanelModule, NgIf, AsyncPipe, NgForOf, MultiSelectModule, CheckboxModule],
+  imports: [RouterOutlet, MenubarModule, InputTextModule, ReactiveFormsModule, OverlayPanelModule, NgIf, AsyncPipe, NgForOf, MultiSelectModule, CheckboxModule, InfiniteScrollModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -26,10 +27,15 @@ export class AppComponent {
   public formGroup: FormGroup;
   public searchControl: FormControl<string | null>;
   public searchResult: Title[] = [];
+  public searchResultOffset = 0;
+  public searchResultPageSize = 50;
   public genres: Genre[] = [];
 
   @ViewChild('searchPanel')
   private searchPanel!: OverlayPanel;
+
+  @ViewChild('searchResultContainer')
+  private searchResultContainer?: ElementRef;
 
   @ViewChildren('genre')
   private genreCheckBoxes!: Checkbox[];
@@ -56,7 +62,8 @@ export class AppComponent {
     const terms = this.searchControl.value ? tokenize(this.searchControl.value) : [];
     const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
 
-    this.searchResult = await this.iptvDbService.search(terms, filterGenres, 0, 100);
+    this.searchResultOffset = 0;
+    this.searchResult = await this.iptvDbService.search(terms, filterGenres, this.searchResultOffset, this.searchResultPageSize);
 
     if (filterGenres.length == 0) {
       const genreIds = this.searchResult.reduce((a, b) => {
@@ -70,8 +77,25 @@ export class AppComponent {
     }
 
     if ($event) {
+      if (this.searchResultContainer) {
+        this.searchResultContainer.nativeElement.scroll({ top: 0, behavior: 'smooth' });
+      }
       this.searchPanel.show($event);
     }
+  }
+
+  public whenSearchFocus = (event: FocusEvent) => {
+    if (this.searchResult.length > 0) {
+      this.searchPanel.show(event);
+    }
+  }
+
+  public whenScrollSearchResult = async (event: IInfiniteScrollEvent): Promise<void> => {
+    const terms = this.searchControl.value ? tokenize(this.searchControl.value) : [];
+    const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
+
+    this.searchResultOffset += this.searchResultPageSize;
+    this.searchResult = [...this.searchResult, ...await this.iptvDbService.search(terms, filterGenres, this.searchResultOffset, this.searchResultPageSize)];
   }
 
   public selectTitle = (title: Title): void => {
