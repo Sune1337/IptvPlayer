@@ -32,7 +32,10 @@
               <div class="title-box" *ngFor="let title of searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
                 <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">
                 <ng-template #elseImg>
-                  <img *ngIf="title.tmdb?.posterPath" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
+                  <img *ngIf="title.tmdb?.posterPath; else thumbnailPlaceholder" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
+                  <ng-template #thumbnailPlaceholder>
+                    <div class="title-thumbnail"></div>
+                  </ng-template>
                 </ng-template>
                 <p>{{ title.name }}</p>
               </div>
