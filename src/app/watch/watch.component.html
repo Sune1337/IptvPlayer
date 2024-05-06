@@ -3,7 +3,7 @@
 </div>
 
 <div *ngIf="selectedTitle">
-  <h3>{{ selectedTitle.titleChannelUrls[0].channelName }}</h3>
+  <h3>{{ selectedTitle.channelUrls[0].channelName }}</h3>
   <p>{{ selectedTitle.name }}</p>
-  <i>{{ selectedTitle.titleChannelUrls[0].url }} (<a href="javascript:void(0);" (click)="openInMPV()">Open in MPV</a>)</i>
+  <i>{{ selectedTitle.channelUrls[0].url }} (<a href="javascript:void(0);" (click)="openInMPV()">Open in MPV</a>)</i>
 </div>

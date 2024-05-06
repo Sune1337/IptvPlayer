@@ -73,8 +73,6 @@ export class SyncTmdb {
 
       this.abortController.signal.throwIfAborted();
     }
-
-    const a = 1;
   }
 
   private generateTitleForSearch = (name: string): string => {

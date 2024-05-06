@@ -46,6 +46,10 @@ export class IptvDbService {
     });
   }
 
+  public getAllChannels = async (): Promise<Channel[]> => {
+    return iptvDb.channels.orderBy('id').toArray()
+  }
+
   public batchTitles = async (add: Title[], update: Title[], remove: number[]): Promise<void> => {
     iptvDb.transaction('rw', iptvDb.titles, async () => {
       await iptvDb.titles.bulkAdd(add);
@@ -65,7 +69,7 @@ export class IptvDbService {
     });
   }
 
-  public search = async (terms: string[], genres: any[], offset: number, limit: number): Promise<Title[]> => {
+  public search = async (terms: string[], channels: number[], genres: number[], offset: number, limit: number): Promise<Title[]> => {
     return iptvDb.transaction('r', iptvDb.titles, async function () {
         let allResults: number[][] = [];
 
@@ -81,6 +85,18 @@ export class IptvDbService {
           );
 
           results.forEach(r => allResults.push(r))
+        }
+
+        if (channels.length > 0) {
+          const results = await Dexie.Promise.all(
+            channels.map(channelId =>
+              iptvDb.titles
+                .where('channelIds')
+                .equals(channelId)
+                .primaryKeys())
+          );
+
+          allResults.push(results.flat());
         }
 
         if (genres.length > 0) {

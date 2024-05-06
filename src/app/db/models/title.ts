@@ -1,4 +1,4 @@
-import { TitleChannelUrls } from './title-channel-urls';
+import { ChannelUrl } from './channel-url';
 import { Tmdb } from './tmdb';
 
 export interface Title {
@@ -6,7 +6,8 @@ export interface Title {
   addedDateUtc: Date;
   name: string;
   thumbnailUrl?: string;
-  titleChannelUrls: TitleChannelUrls[];
+  channelUrls: ChannelUrl[];
+  channelIds: number[];
   terms: string[];
   tmdb?: Tmdb;
 }

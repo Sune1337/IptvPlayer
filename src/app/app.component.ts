@@ -14,22 +14,27 @@ import { Genre } from './db/models/genre';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { Checkbox, CheckboxModule } from 'primeng/checkbox';
 import { IInfiniteScrollEvent, InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { SidebarModule } from 'primeng/sidebar';
+import { ButtonModule } from 'primeng/button';
+import { Channel } from './db/models/channel';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenubarModule, InputTextModule, ReactiveFormsModule, OverlayPanelModule, NgIf, AsyncPipe, NgForOf, MultiSelectModule, CheckboxModule, InfiniteScrollModule],
+  imports: [RouterOutlet, MenubarModule, InputTextModule, ReactiveFormsModule, OverlayPanelModule, NgIf, AsyncPipe, NgForOf, MultiSelectModule, CheckboxModule, InfiniteScrollModule, SidebarModule, ButtonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
 
   public formGroup: FormGroup;
+  public sidebarVisible = false;
   public searchControl: FormControl<string | null>;
   public searchResult: Title[] = [];
   public searchResultOffset = 0;
   public searchResultPageSize = 50;
   public genres: Genre[] = [];
+  public channels: Channel[] = [];
 
   @ViewChild('searchPanel')
   private searchPanel!: OverlayPanel;
@@ -39,6 +44,9 @@ export class AppComponent {
 
   @ViewChildren('genre')
   private genreCheckBoxes!: Checkbox[];
+
+  @ViewChildren('channel')
+  private channelCheckBoxes!: Checkbox[];
 
   constructor(
     private router: Router,
@@ -51,6 +59,10 @@ export class AppComponent {
       id: new FormControl<number | undefined>(undefined),
       search: this.searchControl = new FormControl('')
     });
+
+    // Subscribe to channels.
+    this.iptvDbService.channels
+      .subscribe(channels => this.channels = channels);
   }
 
   public items: MenuItem[] = [
@@ -59,10 +71,11 @@ export class AppComponent {
 
   public whenSearchChange = async ($event?: Event): Promise<void> => {
     const terms = this.searchControl.value ? tokenize(this.searchControl.value) : [];
+    const filterChannels = this.channelCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
     const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
 
     this.searchResultOffset = 0;
-    this.searchResult = await this.iptvDbService.search(terms, filterGenres, this.searchResultOffset, this.searchResultPageSize);
+    this.searchResult = await this.iptvDbService.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize);
 
     if (filterGenres.length == 0) {
       const genreIds = this.searchResult.reduce((a, b) => {
@@ -83,18 +96,38 @@ export class AppComponent {
     }
   }
 
+  public whenScrollSearchResult = async (event: IInfiniteScrollEvent): Promise<void> => {
+    const terms = this.searchControl.value ? tokenize(this.searchControl.value) : [];
+    const filterChannels = this.channelCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
+    const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
+
+    this.searchResultOffset += this.searchResultPageSize;
+    this.searchResult = [...this.searchResult, ...await this.iptvDbService.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize)];
+  }
+
   public whenSearchFocus = (event: FocusEvent) => {
     if (this.searchResult.length > 0) {
       this.searchPanel.show(event);
     }
   }
 
-  public whenScrollSearchResult = async (event: IInfiniteScrollEvent): Promise<void> => {
-    const terms = this.searchControl.value ? tokenize(this.searchControl.value) : [];
-    const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
+  public whenMenubarClick = (event: MouseEvent): void => {
+    if (event.target instanceof HTMLInputElement) {
+      // Don't close overlay if user clicked the search-input.
+      return;
+    }
 
-    this.searchResultOffset += this.searchResultPageSize;
-    this.searchResult = [...this.searchResult, ...await this.iptvDbService.search(terms, filterGenres, this.searchResultOffset, this.searchResultPageSize)];
+    if (event.target instanceof HTMLElement && event.target.closest('#navbarButton')) {
+      // Don't close overlay if user clicked sidebar-button.
+      return;
+    }
+
+    if (this.sidebarVisible) {
+      this.sidebarVisible = false;
+      return;
+    }
+
+    this.searchPanel.hide();
   }
 
   public selectTitle = (title: Title): void => {

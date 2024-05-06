@@ -1,4 +1,4 @@
-export interface TitleChannelUrls {
+export interface ChannelUrl {
   channelName: string;
   url: string;
 }

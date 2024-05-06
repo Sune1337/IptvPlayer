@@ -61,9 +61,9 @@ export class SyncChannelList {
 
     const playlist = parse(await response.text());
 
-    console.log('Process playlist.');
-    const titles: { [key: string]: Title; } = {};
-    const channels: { [key: string]: Channel; } = {};
+    console.log('Save channels.');
+
+    let channels: { [key: string]: Channel; } = {};
     for (const playlistItem of playlist.items) {
       // Get channel.
       const channelName = playlistItem.group.title;
@@ -71,24 +71,10 @@ export class SyncChannelList {
       if (!channel) {
         channel = channels[channelName] = { name: channelName, addedDateUtc: new Date() };
       }
-
-      // Get title.
-      const titleName = playlistItem.name;
-      let title = titles[titleName];
-      if (!title) {
-        title = titles[titleName] = { name: playlistItem.name, thumbnailUrl: playlistItem.tvg.logo, titleChannelUrls: [], terms: [], addedDateUtc: new Date() };
-      }
-      title.terms = tokenize(title.name);
-      title.titleChannelUrls.push({ channelName: channel.name, url: playlistItem.url });
     }
 
-    console.log('Save channels.');
-
     // Get all current channels.
-    const dbChannels = await firstValueFrom(
-      this.iptvDbService.channels
-        .pipe(takeUntil(abortSubject))
-    );
+    let dbChannels = await this.iptvDbService.getAllChannels();
 
     const channelsMatch = new FullMatch(dbChannels, Object.entries(channels).map(([_, channel]) => channel), c => c.name);
     const addChannels: Channel[] = [];
@@ -108,7 +94,32 @@ export class SyncChannelList {
     await this.iptvDbService.batchChannels(addChannels, removeChannels);
     abortController.signal.throwIfAborted();
 
+    // Get channels from DB, so we get the id's.
+    dbChannels = await this.iptvDbService.getAllChannels();
+
+    // Convert db-channels to map.
+    channels = {};
+    dbChannels.forEach(c => channels[c.name] = c);
+
     console.log('Save titles.');
+
+    const titles: { [key: string]: Title; } = {};
+    for (const playlistItem of playlist.items) {
+      // Get channel.
+      let channel = channels[playlistItem.group.title];
+
+      // Get title.
+      const titleName = playlistItem.name;
+      let title = titles[titleName];
+      if (!title) {
+        title = titles[titleName] = { name: playlistItem.name, thumbnailUrl: playlistItem.tvg.logo, channelUrls: [], channelIds: [], terms: [], addedDateUtc: new Date() };
+      }
+      title.terms = tokenize(title.name);
+      title.channelUrls.push({ channelName: channel.name, url: playlistItem.url });
+      if (channel.id && title.channelIds.indexOf(channel.id) < 0) {
+        title.channelIds.push(channel.id);
+      }
+    }
 
     // Get all current titles.
     const dbTitles = await this.iptvDbService.getAllTitles();
@@ -131,7 +142,7 @@ export class SyncChannelList {
         const isChanged =
           titlesMatch.current[0].name != titlesMatch.current[1].name ||
           titlesMatch.current[0].thumbnailUrl != titlesMatch.current[1].thumbnailUrl ||
-          !compareArrays(titlesMatch.current[0].titleChannelUrls, titlesMatch.current[1].titleChannelUrls, (a, b) => a.url == b.url || a.channelName == b.channelName) ||
+          !compareArrays(titlesMatch.current[0].channelUrls, titlesMatch.current[1].channelUrls, (a, b) => a.url == b.url || a.channelName == b.channelName) ||
           !compareArrays(titlesMatch.current[0].terms, titlesMatch.current[1].terms, (a, b) => a == b);
 
         if (isChanged) {

@@ -1,6 +1,8 @@
 <ng-container [formGroup]="formGroup">
-  <p-menubar [model]="items">
+
+  <p-menubar [model]="items" (click)="whenMenubarClick($event)">
     <ng-template pTemplate="start">
+      <p-button id="navbarButton" (click)="sidebarVisible = true" icon="pi pi-bars" styleClass="p-button-text mr-3"/>
       <a routerLink="/"><img src="assets/iptv-32.png" alt="IPTV icon"></a>
     </ng-template>
 
@@ -11,12 +13,12 @@
     </ng-template>
   </p-menubar>
 
-  <p-overlayPanel #searchPanel>
+  <p-overlayPanel #searchPanel [dismissable]="false" [autoZIndex]="false" [style]="{'z-index': 1}">
     <ng-template pTemplate="content">
       <div #searchResultContainer class="search-result-container" infinite-scroll [scrollWindow]="false" (scrolled)="whenScrollSearchResult($event)">
         <div>
           <div class="mb-3 flex flex-wrap">
-            <div *ngFor="let genre of genres; let i = index" class="mr-2">
+            <div *ngFor="let genre of genres" class="channel-checkbox mr-2">
               <p-checkbox #genre
                           [value]="genre.id"
                           [label]="genre.name"
@@ -46,5 +48,19 @@
     </ng-template>
   </p-overlayPanel>
 
+  <p-sidebar [(visible)]="sidebarVisible" [modal]="false" [autoZIndex]="false" [style]="{'z-index': 2}">
+    <h3>Channels</h3>
+    <div>
+      <div *ngFor="let channel of channels" class="mr-2">
+        <p-checkbox #channel
+                    [value]="channel.id"
+                    [label]="channel.name"
+                    (onChange)="whenSearchChange()"
+        />
+      </div>
+    </div>
+  </p-sidebar>
+
   <router-outlet></router-outlet>
+
 </ng-container>

@@ -68,7 +68,7 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
     }
 
     this.videoElement?.pause();
-    window.open(`mpv:${this.selectedTitle.titleChannelUrls[0].url}`);
+    window.open(`mpv:${this.selectedTitle.channelUrls[0].url}`);
   }
 
   private async loadTitle() {
@@ -84,9 +84,9 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
 
     this.selectedTitle = title;
 
-    console.log(`Play: ${title.titleChannelUrls[0].url}`);
+    console.log(`Play: ${title.channelUrls[0].url}`);
     this.player
-      .load(title.titleChannelUrls[0].url)
+      .load(title.channelUrls[0].url)
       .then(() => {
         this.videoElement?.play();
       })
