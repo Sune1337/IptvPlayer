@@ -106,6 +106,7 @@ export class IptvDbService {
         return iptvDb.titles
           .where(':id')
           .anyOf(result)
+          .reverse()
           .offset(offset)
           .limit(limit)
           .toArray();
