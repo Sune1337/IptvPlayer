@@ -54,7 +54,6 @@ export class AppComponent {
   }
 
   public items: MenuItem[] = [
-    { label: "Watch", routerLink: '/watch' },
     { label: "Settings", routerLink: 'settings' }
   ];
 
