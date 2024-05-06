@@ -1,5 +1,5 @@
-<ng-container>
-  <p-menubar [model]="items" [formGroup]="formGroup">
+<ng-container [formGroup]="formGroup">
+  <p-menubar [model]="items">
     <ng-template pTemplate="start">
       <img src="assets/iptv-32.png" alt="IPTV icon">
     </ng-template>
@@ -12,6 +12,15 @@
   </p-menubar>
 
   <p-overlayPanel #searchPanel [style]="{ width: '95%' }" [showCloseIcon]="true">
+    <div class="flex mb-3">
+      <div *ngFor="let genre of genres; let i = index" class="flex mr-2">
+        <p-checkbox #genre
+                    [value]="genre.id"
+                    [label]="genre.name"
+                    (onChange)="whenSearchChange()"
+        />
+      </div>
+    </div>
     <div class="flex flex-wrap justify-content-between">
       <div class="title-box" *ngFor="let title of searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
         <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">

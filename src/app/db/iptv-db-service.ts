@@ -65,30 +65,50 @@ export class IptvDbService {
     });
   }
 
-  public search = async (terms: string[]): Promise<Title[]> => {
-    if (terms.length == 0) {
-      return [];
-    }
-
+  public search = async (terms: string[], genres: any[], offset: number, limit: number): Promise<Title[]> => {
     return iptvDb.transaction('r', iptvDb.titles, async function () {
-        // Parallel search for all prefixes - just select resulting primary keys
-        const results = await Dexie.Promise.all(
-          terms.map(prefix =>
-            iptvDb.titles
-              .where('terms')
-              .startsWith(prefix)
-              .primaryKeys())
-        );
+        let allResults: number[][] = [];
+
+        if (terms.length > 0) {
+          // Parallel search for all prefixes - just select resulting primary keys
+
+          const results = await Dexie.Promise.all(
+            terms.map(prefix =>
+              iptvDb.titles
+                .where('terms')
+                .startsWith(prefix)
+                .primaryKeys())
+          );
+
+          results.forEach(r => allResults.push(r))
+        }
+
+        if (genres.length > 0) {
+          const results = await iptvDb.titles
+            .where('tmdb.genreIds')
+            .anyOf(genres)
+            .primaryKeys();
+
+          allResults.push(results);
+        }
+
+        if (allResults.length == 0) {
+          return [];
+        }
 
         // Intersect result set of primary keys
-        const reduced = results
-          .reduce((a, b) => {
-            const set = new Set(b);
-            return a.filter(k => set.has(k));
+        const result = allResults
+          .reduce((prev, curr) => {
+            const set = new Set(curr);
+            return prev.filter(k => set.has(k));
           });
 
-        // Finally select entire documents from intersection
-        return iptvDb.titles.where(':id').anyOf(reduced).limit(100).toArray();
+        return iptvDb.titles
+          .where(':id')
+          .anyOf(result)
+          .offset(offset)
+          .limit(100)
+          .toArray();
       }
     );
   }
@@ -105,6 +125,10 @@ export class IptvDbService {
     return iptvDb.titles
       .filter(title => title.tmdb == null)
       .toArray();
+  }
+
+  public getGenres = async (genreIds: number[]): Promise<Genre[]> => {
+    return iptvDb.genres.where('id').anyOf(genreIds).toArray();
   }
 
   private processAccountSettings = async (accountSettings?: AccountSettings): Promise<void> => {
