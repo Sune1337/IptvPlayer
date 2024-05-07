@@ -85,6 +85,12 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
     this.selectedTitle = title;
 
     console.log(`Play: ${title.channelUrls[0].url}`);
+    if (this.videoElement) {
+      // Set video-src to an empty string to cancel previous video.
+      // This seems to help if the previous video did not start playing because of no response from server.
+      this.videoElement.src = '';
+    }
+
     this.player
       .load(title.channelUrls[0].url)
       .then(() => {
