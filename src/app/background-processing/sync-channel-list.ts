@@ -101,7 +101,7 @@ export class SyncChannelList {
     channels = {};
     dbChannels.forEach(c => channels[c.name] = c);
 
-    console.log('Save titles.');
+    console.log('Processing titles.');
 
     const titles: { [key: string]: Title; } = {};
     for (const playlistItem of playlist.items) {
@@ -153,6 +153,8 @@ export class SyncChannelList {
         }
       }
     }
+
+    console.log(`Adding ${addTitles.length}, updating ${updateTitles.length} and removing ${removeTitles.length} titles.`);
 
     await this.iptvDbService.batchTitles(addTitles, updateTitles, removeTitles);
     abortController.signal.throwIfAborted();
