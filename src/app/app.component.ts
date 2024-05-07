@@ -17,6 +17,7 @@ import { IInfiniteScrollEvent, InfiniteScrollModule } from 'ngx-infinite-scroll'
 import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { Channel } from './db/models/channel';
+import { fromEvent } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -63,6 +64,11 @@ export class AppComponent {
     // Subscribe to channels.
     this.iptvDbService.channels
       .subscribe(channels => this.channels = channels);
+
+    // Subscribe to clicks in document to close overlays.
+    fromEvent(document, 'click')
+      .subscribe(this.whenDocumentClick);
+
   }
 
   public items: MenuItem[] = [
@@ -111,25 +117,6 @@ export class AppComponent {
     }
   }
 
-  public whenMenubarClick = (event: MouseEvent): void => {
-    if (event.target instanceof HTMLInputElement) {
-      // Don't close overlay if user clicked the search-input.
-      return;
-    }
-
-    if (event.target instanceof HTMLElement && event.target.closest('#navbarButton')) {
-      // Don't close overlay if user clicked sidebar-button.
-      return;
-    }
-
-    if (this.sidebarVisible) {
-      this.sidebarVisible = false;
-      return;
-    }
-
-    this.searchPanel.hide();
-  }
-
   public selectTitle = (title: Title): void => {
     this.router.navigate(['watch', title.id]);
     this.searchPanel.hide();
@@ -146,5 +133,19 @@ export class AppComponent {
         event.target.src = `https://image.tmdb.org/t/p/w200${title.tmdb?.posterPath}`;
       }
     }
+  }
+
+  private whenDocumentClick = (event: Event): void => {
+    if (event.target instanceof HTMLElement && event.target.closest('.stop-close-overlay')) {
+      // Don't close overlay.
+      return;
+    }
+
+    if (this.sidebarVisible) {
+      this.sidebarVisible = false;
+      return;
+    }
+
+    this.searchPanel.hide();
   }
 }

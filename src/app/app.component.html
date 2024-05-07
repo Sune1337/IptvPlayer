@@ -1,19 +1,19 @@
 <ng-container [formGroup]="formGroup">
 
-  <p-menubar [model]="items" (click)="whenMenubarClick($event)">
+  <p-menubar [model]="items">
     <ng-template pTemplate="start">
-      <p-button id="navbarButton" (click)="sidebarVisible = true" icon="pi pi-bars" styleClass="p-button-text mr-3"/>
+      <p-button (click)="sidebarVisible = true" icon="pi pi-bars" styleClass="p-button-text mr-3" class="stop-close-overlay"/>
       <a routerLink="/"><img src="assets/iptv-32.png" alt="IPTV icon"></a>
     </ng-template>
 
     <ng-template pTemplate="end">
       <div class="flex align-items-center gap-2">
-        <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto" formControlName="search" (change)="whenSearchChange($event)" (focus)="whenSearchFocus($event)"/>
+        <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto stop-close-overlay" formControlName="search" (change)="whenSearchChange($event)" (focus)="whenSearchFocus($event)"/>
       </div>
     </ng-template>
   </p-menubar>
 
-  <p-overlayPanel #searchPanel [dismissable]="false" [autoZIndex]="false" [style]="{'z-index': 1}">
+  <p-overlayPanel #searchPanel [dismissable]="false" [autoZIndex]="false" [style]="{'z-index': 1}" styleClass="stop-close-overlay">
     <ng-template pTemplate="content">
       <div #searchResultContainer class="search-result-container" infinite-scroll [scrollWindow]="false" (scrolled)="whenScrollSearchResult($event)">
         <div>
@@ -48,7 +48,7 @@
     </ng-template>
   </p-overlayPanel>
 
-  <p-sidebar [(visible)]="sidebarVisible" [modal]="false" [autoZIndex]="false" [style]="{'z-index': 2}">
+  <p-sidebar [(visible)]="sidebarVisible" [modal]="false" [autoZIndex]="false" [style]="{'z-index': 2}" styleClass="stop-close-overlay">
     <h3>Channels</h3>
     <div>
       <div *ngFor="let channel of channels" class="mr-2">
