@@ -105,9 +105,7 @@ export class AppComponent {
   }
 
   public whenSearchFocus = (event: FocusEvent) => {
-    if (this.searchResult.length > 0) {
-      this.searchPanel.show(event);
-    }
+    this.searchPanel.show(event);
   }
 
   public selectTitle = (title: Title): void => {
