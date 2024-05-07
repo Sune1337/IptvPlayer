@@ -52,11 +52,21 @@ export class TmdbApi {
       return;
     }
 
-    const result = await genresResponse.json();
-    if (result.results?.length == 1) {
-      return result.results[0];
+    const response = await genresResponse.json() as { results: any[] };
+    if (response.results.length < 1) {
+      return undefined;
     }
 
-    return;
+    // We got multiple results. Return the one with highest vote-count.
+    let maxVoteCount = 0;
+    let result: any;
+    for (const r of response.results) {
+      if (r.vote_count > maxVoteCount) {
+        maxVoteCount = r.vote_count;
+        result = r;
+      }
+    }
+
+    return result;
   }
 }
