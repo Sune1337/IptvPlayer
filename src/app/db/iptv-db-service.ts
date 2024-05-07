@@ -100,12 +100,15 @@ export class IptvDbService {
         }
 
         if (genres.length > 0) {
-          const results = await iptvDb.titles
-            .where('tmdb.genreIds')
-            .anyOf(genres)
-            .primaryKeys();
+          const results = await Dexie.Promise.all(
+            genres.map(genreId =>
+              iptvDb.titles
+                .where('tmdb.genreIds')
+                .equals(genreId)
+                .primaryKeys())
+          );
 
-          allResults.push(results);
+          allResults.push(results.flat());
         }
 
         if (allResults.length == 0) {
