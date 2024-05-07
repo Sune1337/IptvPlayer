@@ -65,6 +65,10 @@ export class AppComponent {
     this.iptvDbService.channels
       .subscribe(channels => this.channels = channels);
 
+    // Subscribe to genres.
+    this.iptvDbService.genres
+      .subscribe(genres => this.genres = genres);
+
     // Subscribe to clicks in document to close overlays.
     fromEvent(document, 'click')
       .subscribe(this.whenDocumentClick);
@@ -82,17 +86,6 @@ export class AppComponent {
 
     this.searchResultOffset = 0;
     this.searchResult = await this.iptvDbService.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize);
-
-    if (filterGenres.length == 0) {
-      const genreIds = this.searchResult.reduce((a, b) => {
-        if (b.tmdb?.genreIds) {
-          b.tmdb.genreIds.forEach(a.add, a);
-        }
-        return a;
-      }, new Set<number>())
-
-      this.genres = await this.iptvDbService.getGenres(Array.from(genreIds));
-    }
 
     if ($event) {
       if (this.searchResultContainer) {
