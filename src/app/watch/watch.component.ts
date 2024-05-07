@@ -96,7 +96,8 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
   }
 
   private initPlayer() {
-    this.player = new shaka.Player(this.videoElement);
+    this.player = new shaka.Player();
+    this.player.attach(this.videoElement);
 
     const ui = new shaka.ui.Overlay(
       this.player,
