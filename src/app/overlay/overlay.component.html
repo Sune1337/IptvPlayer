@@ -48,15 +48,15 @@
 
       <div>
         <div class="flex flex-wrap justify-content-between">
-          <div class="title-box" *ngFor="let title of componentState.searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
-            <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">
+          <div class="title-box" *ngFor="let title of componentState.searchResult; index as i; trackBy: trackSearchResult">
+            <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail cursor-pointer" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)" (click)="selectTitle(title)">
             <ng-template #elseImg>
-              <img *ngIf="title.tmdb?.posterPath; else thumbnailPlaceholder" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
+              <img *ngIf="title.tmdb?.posterPath; else thumbnailPlaceholder" class="title-thumbnail cursor-pointer" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}" (click)="selectTitle(title)">
               <ng-template #thumbnailPlaceholder>
                 <div class="title-thumbnail"></div>
               </ng-template>
             </ng-template>
-            <p>{{ title.name }}</p>
+            <p class="cursor-pointer" (click)="selectTitle(title)">{{ title.name }}</p>
           </div>
         </div>
       </div>
