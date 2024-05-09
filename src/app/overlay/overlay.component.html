@@ -1,0 +1,65 @@
+<div *ngIf="(componentState | async) as componentState" class="flex flex-row overlay" [formGroup]="formGroup">
+
+  <div>
+    <p-sidebar [(visible)]="componentState.sidebarVisible" [modal]="false" styleClass="stop-close-overlay">
+      <ng-template pTemplate="header">
+        <span class="font-semibold text-xl">Channels</span>
+      </ng-template>
+
+      <div *ngFor="let channel of componentState.channels" class="mr-2">
+        <p-checkbox #channel
+                    [value]="channel.id"
+                    [label]="channel.name"
+                    (onChange)="whenSearchChange()"
+        />
+      </div>
+    </p-sidebar>
+  </div>
+
+  <div class="flex flex-1 flex-column">
+
+    <div>
+      <p-menubar [model]="items">
+        <ng-template pTemplate="start">
+          <p-button (click)="showSidebar()" icon="pi pi-bars" styleClass="p-button-text mr-3" class="stop-close-overlay"/>
+          <a routerLink="/"><img src="assets/iptv-32.png" alt="IPTV icon"></a>
+        </ng-template>
+
+        <ng-template pTemplate="end">
+          <div class="flex align-items-center gap-2">
+            <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto stop-close-overlay" formControlName="search" (change)="whenSearchChange($event)" (click)="whenSearchClick($event)"/>
+          </div>
+        </ng-template>
+      </p-menubar>
+    </div>
+
+    <div #searchResultContainer class="flex-1 search-result-container stop-close-overlay p-2" infinite-scroll [scrollWindow]="false" (scrolled)="whenScrollSearchResult($event)" (click)="hideSidebar()">
+      <div>
+        <div class="mb-3 flex flex-wrap">
+          <div *ngFor="let genre of componentState.genres" class="channel-checkbox m-1">
+            <p-checkbox #genre
+                        [value]="genre.id"
+                        [label]="genre.name"
+                        (onChange)="whenSearchChange()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex flex-wrap justify-content-between">
+          <div class="title-box" *ngFor="let title of componentState.searchResult; index as i; trackBy: trackSearchResult" (click)="selectTitle(title)">
+            <img *ngIf="title.thumbnailUrl; else elseImg" class="title-thumbnail" [src]="title.thumbnailUrl" (error)="whenThumbnailError($event, title)">
+            <ng-template #elseImg>
+              <img *ngIf="title.tmdb?.posterPath; else thumbnailPlaceholder" class="title-thumbnail" src="https://image.tmdb.org/t/p/w200{{ title.tmdb?.posterPath }}">
+              <ng-template #thumbnailPlaceholder>
+                <div class="title-thumbnail"></div>
+              </ng-template>
+            </ng-template>
+            <p>{{ title.name }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
