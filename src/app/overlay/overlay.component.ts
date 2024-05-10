@@ -9,7 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MenubarModule } from 'primeng/menubar';
 import { SidebarModule } from 'primeng/sidebar';
 import { Checkbox, CheckboxModule } from 'primeng/checkbox';
-import { IInfiniteScrollEvent, InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { IInfiniteScrollEvent, InfiniteScrollDirective, InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { IptvDbService } from '../db/iptv-db-service';
 import { tokenize } from '../utils/tokenize';
 import { Channel } from '../db/models/channel';
@@ -57,6 +57,9 @@ export class OverlayComponent implements OnDestroy {
 
   @ViewChild('searchResultContainer')
   private searchResultContainer?: ElementRef;
+
+  @ViewChild(InfiniteScrollDirective)
+  infiniteScroll?: InfiniteScrollDirective;
 
   @ViewChildren('genre')
   private genreCheckBoxes!: Checkbox[];
@@ -117,6 +120,12 @@ export class OverlayComponent implements OnDestroy {
 
     if (this.searchResultContainer) {
       this.searchResultContainer.nativeElement.scroll({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+          this.infiniteScroll?.destroyScroller();
+          this.infiniteScroll?.setup();
+        }
+        // Wait one second so that the smooth scroll finishes scrolling to top before recreating infinite-scroll.
+        , 1000);
     }
     this.showSearchResultContainer();
   }
