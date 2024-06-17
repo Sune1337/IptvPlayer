@@ -27,7 +27,10 @@
 
         <ng-template pTemplate="end">
           <div class="flex align-items-center gap-2">
-            <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto stop-close-overlay" formControlName="search" (change)="whenSearchChange($event)" (click)="whenSearchClick($event)"/>
+            <div class="web-worker-log" *ngIf="webWorkerLog | async as logMessage">{{ logMessage }}</div>
+            <div>
+              <input type="text" pInputText placeholder="Search" class="w-8rem sm:w-auto stop-close-overlay" formControlName="search" (change)="whenSearchChange($event)" (click)="whenSearchClick($event)"/>
+            </div>
           </div>
         </ng-template>
       </p-menubar>

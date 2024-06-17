@@ -15,6 +15,7 @@ import { tokenize } from '../utils/tokenize';
 import { Channel } from '../db/models/channel';
 import { Genre } from '../db/models/genre';
 import { Title } from '../db/models/title';
+import { WebWorkerService } from '../background-processing/webworker-service';
 
 interface ComponentState {
   sidebarVisible: boolean;
@@ -54,6 +55,7 @@ export class OverlayComponent implements OnDestroy {
   public searchControl: FormControl<string | null>;
   public searchResultOffset = 0;
   public searchResultPageSize = 50;
+  public webWorkerLog;
 
   @ViewChild('searchResultContainer')
   private searchResultContainer?: ElementRef;
@@ -76,7 +78,8 @@ export class OverlayComponent implements OnDestroy {
 
   constructor(
     private iptvDbService: IptvDbService,
-    private router: Router
+    private router: Router,
+    private webWorkerService: WebWorkerService
   ) {
     // Setup form-controls.
     this.formGroup = new FormGroup({
@@ -95,6 +98,9 @@ export class OverlayComponent implements OnDestroy {
     // Subscribe to clicks in document to close overlays.
     fromEvent(document, 'click')
       .subscribe(this.whenDocumentClick);
+
+    // Make web-worker-log visible to view.
+    this.webWorkerLog = webWorkerService.logMessages;
   }
 
   ngOnDestroy(): void {

@@ -18,7 +18,7 @@ export class SyncTmdb {
 
   public sync = async (): Promise<void> => {
     // Get all genres.
-    console.log('Download genres.');
+    postMessage({ type: 'log', message: 'Download genres...' });
     const tmdbApi = new TmdbApi();
     const genres = await tmdbApi.getGenres(this.accountSettings, this.abortController)
     if (!genres) {
@@ -31,7 +31,7 @@ export class SyncTmdb {
         .pipe(takeUntil(this.abortSubject))
     );
 
-    console.log('Save genres.');
+    postMessage({ type: 'log', message: 'Save genres...' });
     const genresMatch = new FullMatch(dbGenres, genres, c => c.id);
     const addGenres: Genre[] = [];
     const removeGenres: number[] = [];
@@ -52,7 +52,8 @@ export class SyncTmdb {
 
     // Get all titles that we have not looked up TMDB information for.
     const titlesWithoutTmdb = await this.iptvDbService.getTitlesWithoutTmdb();
-    for (const titleWithoutTmdb of titlesWithoutTmdb) {
+    for (let i = 0; i < titlesWithoutTmdb.length; i++) {
+      const titleWithoutTmdb = titlesWithoutTmdb[i];
       const regexMatch = /\[(\d{4})]/.exec(titleWithoutTmdb.name);
       let releaseYear: number | null = null;
       if (regexMatch && regexMatch?.length > 1) {
@@ -60,7 +61,7 @@ export class SyncTmdb {
       }
 
       const titleName = this.generateTitleForSearch(titleWithoutTmdb.name);
-      console.log(`Search movie: ${titleWithoutTmdb.name} (${titleName})`);
+      postMessage({ type: 'log', message: `Search movie ${i + 1}/${titlesWithoutTmdb.length}: ${titleWithoutTmdb.name} (${titleName})...` });
       const tmdb = await tmdbApi.searchMovie(this.accountSettings, this.abortController, titleName, releaseYear)
       if (!tmdb) {
         // No information found.

@@ -1,5 +1,3 @@
-import { EmptyError } from 'rxjs';
-
 export type SerialFunctionDelegate<T> = (abortController: AbortController) => Promise<T>;
 
 export class SerialFunction<T> {
@@ -9,7 +7,8 @@ export class SerialFunction<T> {
   private abortController?: AbortController;
 
   constructor(
-    private delegate: SerialFunctionDelegate<T>
+    private delegate: SerialFunctionDelegate<T>,
+    private errorHandler: (error: any) => void,
   ) {
   }
 
@@ -31,11 +30,7 @@ export class SerialFunction<T> {
         // Do work.
         await this.delegate(this.abortController);
       } catch (error) {
-        if (error instanceof DOMException && error.name == "AbortError") {
-          // Ignore.
-        } else {
-          console.error(error);
-        }
+        this.errorHandler(error);
       }
     }
 

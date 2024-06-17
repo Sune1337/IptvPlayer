@@ -17,7 +17,7 @@ export class SyncChannelList {
   constructor(
     private iptvDbService: IptvDbService
   ) {
-    this.syncSerialFunction = new SerialFunction(this.doSync);
+    this.syncSerialFunction = new SerialFunction(this.doSync, this.errorHandler);
 
     // Sync playlist when account-settings change.
     this.iptvDbService.accountSettings.subscribe(() => this.sync());
@@ -53,15 +53,16 @@ export class SyncChannelList {
       return;
     }
 
-    console.log('Download playlist.');
-    const response = await fetch(accountSettings.playlistUrl, { signal: abortController.signal })
+    postMessage({ type: 'log', message: 'Download playlist...' });
+
+    const response = await fetch(accountSettings.playlistUrl, { signal: abortController.signal });
     if (!response.ok) {
       return;
     }
 
     const playlist = parse(await response.text());
 
-    console.log('Save channels.');
+    postMessage({ type: 'log', message: 'Save channels...' });
 
     let channels: { [key: string]: Channel; } = {};
     for (const playlistItem of playlist.items) {
@@ -101,7 +102,7 @@ export class SyncChannelList {
     channels = {};
     dbChannels.forEach(c => channels[c.name] = c);
 
-    console.log('Processing titles.');
+    postMessage({ type: 'log', message: 'Processing titles...' });
 
     const titles: { [key: string]: Title; } = {};
     for (const playlistItem of playlist.items) {
@@ -154,7 +155,7 @@ export class SyncChannelList {
       }
     }
 
-    console.log(`Adding ${addTitles.length}, updating ${updateTitles.length} and removing ${removeTitles.length} titles.`);
+    postMessage({ type: 'log', message: `Adding ${addTitles.length}, updating ${updateTitles.length} and removing ${removeTitles.length} titles.` });
 
     await this.iptvDbService.batchTitles(addTitles, updateTitles, removeTitles);
     abortController.signal.throwIfAborted();
@@ -162,5 +163,13 @@ export class SyncChannelList {
     // Sync TMDB information.
     const syncTmdb = new SyncTmdb(this.iptvDbService, accountSettings, abortController, abortSubject);
     await syncTmdb.sync();
+
+    postMessage({ type: 'log', message: '' });
+  }
+
+  private errorHandler = (error: any): void => {
+    if (error.message) {
+      postMessage({ type: 'log', message: error.message });
+    }
   }
 }
