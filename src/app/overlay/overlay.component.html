@@ -21,8 +21,10 @@
     <div>
       <p-menubar [model]="items">
         <ng-template pTemplate="start">
-          <p-button (click)="showSidebar()" icon="pi pi-bars" styleClass="p-button-text mr-3" class="stop-close-overlay"/>
-          <a routerLink="/"><img src="assets/iptv-32.png" alt="IPTV icon"></a>
+          <div class="white-space-nowrap">
+            <p-button (click)="showSidebar()" icon="pi pi-bars" styleClass="p-button-text mr-3" class="stop-close-overlay"/>
+            <a routerLink="/"><img src="assets/iptv-32.png" alt="IPTV icon"></a>
+          </div>
         </ng-template>
 
         <ng-template pTemplate="end">
