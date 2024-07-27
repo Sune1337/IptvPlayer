@@ -143,8 +143,9 @@ export class SyncChannelList {
         const isChanged =
           titlesMatch.current[0].name != titlesMatch.current[1].name ||
           titlesMatch.current[0].thumbnailUrl != titlesMatch.current[1].thumbnailUrl ||
-          !compareArrays(titlesMatch.current[0].channelUrls, titlesMatch.current[1].channelUrls, (a, b) => a.url == b.url || a.channelName == b.channelName) ||
-          !compareArrays(titlesMatch.current[0].terms, titlesMatch.current[1].terms, (a, b) => a == b);
+          !compareArrays(titlesMatch.current[0].channelUrls, titlesMatch.current[1].channelUrls, (a, b) => a.url == b.url && a.channelName == b.channelName) ||
+          !compareArrays(titlesMatch.current[0].terms, titlesMatch.current[1].terms, (a, b) => a == b) ||
+          !compareArrays(titlesMatch.current[0].channelIds, titlesMatch.current[1].channelIds, (a, b) => a == b);
 
         if (isChanged) {
           // Title was updated.
