@@ -1,12 +1,14 @@
 using ReverseProxy;
+using ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Add http-forwarder used by reverse proxy.
-builder.Services.AddHttpForwarder();
+// Add reverse proxy services.
+builder.Services.Configure<ReverseProxyOptions>(builder.Configuration.GetSection(nameof(ReverseProxyOptions)));
+builder.Services.AddCustomReverseProxy();
 
 var app = builder.Build();
 
@@ -21,7 +23,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Map reverse proxy route.
+// Map reverse proxy routes.
 app.MapReverseProxy();
 
 app.MapControllerRoute(
