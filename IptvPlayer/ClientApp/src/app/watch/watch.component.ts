@@ -63,13 +63,16 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
     }
   }
 
-  public openInMPV = (): void => {
+  public openInMPV = async (): Promise<void> => {
     if (!this.selectedTitle) {
       return;
     }
 
     this.videoElement?.pause();
-    window.open(`mpv:${this.selectedTitle.channelUrls[0].url}`);
+
+    const accountSettings = await firstValueFrom(this.iptvDbService.accountSettings);
+    const movieUrl = accountSettings?.proxyUrl ? (accountSettings.proxyUrl + this.selectedTitle.channelUrls[0].url) : this.selectedTitle.channelUrls[0].url;
+    window.open(`mpv:${movieUrl}`);
   }
 
   private async loadTitle() {
@@ -89,6 +92,7 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
     const movieUrl = accountSettings?.proxyUrl ? (accountSettings.proxyUrl + title.channelUrls[0].url) : title.channelUrls[0].url;
 
     console.log(`Play: ${movieUrl}`);
+
     this.player
       .load(movieUrl)
       .then(() => {
