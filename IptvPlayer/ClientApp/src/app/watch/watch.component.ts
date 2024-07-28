@@ -3,6 +3,7 @@ import { firstValueFrom } from "rxjs";
 import { AsyncPipe, NgIf } from '@angular/common';
 import { IptvDbService } from '../db/iptv-db-service';
 import { Title } from '../db/models/title';
+import { prepareTitle } from "../utils/processTitle";
 
 declare let shaka: any;
 
@@ -69,10 +70,7 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
     }
 
     this.videoElement?.pause();
-
-    const accountSettings = await firstValueFrom(this.iptvDbService.accountSettings);
-    const movieUrl = accountSettings?.proxyUrl ? (accountSettings.proxyUrl + this.selectedTitle.channelUrls[0].url) : this.selectedTitle.channelUrls[0].url;
-    window.open(`mpv:${movieUrl}`);
+    window.open(`mpv:${this.selectedTitle.channelUrls[0].url}`);
   }
 
   private async loadTitle() {
@@ -81,20 +79,18 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
       return;
     }
 
+    const accountSettings = await firstValueFrom(this.iptvDbService.accountSettings);
     const title = await this.iptvDbService.getTitle(id);
     if (!title) {
       return;
     }
 
-    this.selectedTitle = title;
+    this.selectedTitle = prepareTitle(accountSettings, title);
 
-    const accountSettings = await firstValueFrom(this.iptvDbService.accountSettings);
-    const movieUrl = accountSettings?.proxyUrl ? (accountSettings.proxyUrl + title.channelUrls[0].url) : title.channelUrls[0].url;
-
-    console.log(`Play: ${movieUrl}`);
+    console.log(`Play: ${this.selectedTitle.channelUrls[0].url}`);
 
     this.player
-      .load(movieUrl)
+      .load(this.selectedTitle.channelUrls[0].url)
       .then(() => {
         this.videoElement?.play();
       })

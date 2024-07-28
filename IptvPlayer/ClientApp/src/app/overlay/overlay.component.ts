@@ -2,7 +2,7 @@ import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, ViewChild, ViewChildren } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, fromEvent, Subject } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem, SharedModule } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
@@ -16,6 +16,7 @@ import { Channel } from '../db/models/channel';
 import { Genre } from '../db/models/genre';
 import { Title } from '../db/models/title';
 import { WebWorkerService } from '../background-processing/webworker-service';
+import { prepareTitle } from "../utils/processTitle";
 
 interface ComponentState {
   sidebarVisible: boolean;
@@ -122,7 +123,7 @@ export class OverlayComponent implements OnDestroy {
     const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
 
     this.searchResultOffset = 0;
-    this.pushComponentState({ searchResult: await this.iptvDbService.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize) });
+    this.pushComponentState({ searchResult: await this.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize) });
 
     if (this.searchResultContainer) {
       this.searchResultContainer.nativeElement.scroll({ top: 0, behavior: 'smooth' });
@@ -142,7 +143,7 @@ export class OverlayComponent implements OnDestroy {
     const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
 
     this.searchResultOffset += this.searchResultPageSize;
-    this.pushComponentState({ searchResult: [...this._componentState.searchResult, ...await this.iptvDbService.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize)] });
+    this.pushComponentState({ searchResult: [...this._componentState.searchResult, ...await this.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize)] });
   }
 
   public whenSearchClick = (event: FocusEvent) => {
@@ -163,7 +164,7 @@ export class OverlayComponent implements OnDestroy {
     if (event.target instanceof HTMLImageElement) {
       event.target.onerror = null;
       if (title.tmdb?.posterPath) {
-        event.target.src = `https://image.tmdb.org/t/p/w200${title.tmdb?.posterPath}`;
+        event.target.src = title.tmdb?.posterPath;
       }
     }
   }
@@ -201,5 +202,21 @@ export class OverlayComponent implements OnDestroy {
   private pushComponentState(state: Partial<ComponentState>): void {
     this._componentState = { ...this._componentState, ...state };
     this.componentState.next(this._componentState);
+  }
+
+  private search = async (terms: string[], channels: number[], genres: number[], offset: number, limit: number): Promise<Title[]> => {
+
+    const accountSettings = await firstValueFrom(this.iptvDbService.accountSettings);
+    const searchResult = this.iptvDbService.search(terms, channels, genres, offset, limit);
+
+    // Iterate search-result to process urls.
+    const newSearchResult: Title[] = [];
+    for (const title of await searchResult) {
+      newSearchResult.push(
+        prepareTitle(accountSettings, title)
+      );
+    }
+
+    return newSearchResult;
   }
 }
