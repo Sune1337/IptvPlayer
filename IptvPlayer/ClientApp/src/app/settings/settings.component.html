@@ -8,6 +8,11 @@
     <label for="tmdbAccessTokenInput">TMDB Access token</label>
     <input id="tmdbAccessTokenInput" type="text" pInputText formControlName="tmdbAccessToken"/>
   </div>
+
+  <div class="flex flex-column gap-2">
+    <label for="proxyUrlInput">Proxy URL</label>
+    <input id="proxyUrlInput" type="text" pInputText formControlName="proxyUrl"/>
+  </div>
 </div>
 
 <p-button styleClass="mt-5" (onClick)="whenSaveClick()" label="Save"></p-button>

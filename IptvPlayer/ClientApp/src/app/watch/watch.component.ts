@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { firstValueFrom } from "rxjs";
 import { AsyncPipe, NgIf } from '@angular/common';
 import { IptvDbService } from '../db/iptv-db-service';
 import { Title } from '../db/models/title';
@@ -84,9 +85,12 @@ export class WatchComponent implements OnInit, OnDestroy, OnChanges, AfterViewIn
 
     this.selectedTitle = title;
 
-    console.log(`Play: ${title.channelUrls[0].url}`);
+    const accountSettings = await firstValueFrom(this.iptvDbService.accountSettings);
+    const movieUrl = accountSettings?.proxyUrl ? (accountSettings.proxyUrl + title.channelUrls[0].url) : title.channelUrls[0].url;
+
+    console.log(`Play: ${movieUrl}`);
     this.player
-      .load(title.channelUrls[0].url)
+      .load(movieUrl)
       .then(() => {
         this.videoElement?.play();
       })

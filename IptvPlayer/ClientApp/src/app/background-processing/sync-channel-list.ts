@@ -55,7 +55,8 @@ export class SyncChannelList {
 
     postMessage({ type: 'log', message: 'Download playlist...' });
 
-    const response = await fetch(accountSettings.playlistUrl, { signal: abortController.signal });
+    const playlistUrl = accountSettings.proxyUrl ? (accountSettings.proxyUrl + accountSettings.playlistUrl) : accountSettings.playlistUrl;
+    const response = await fetch(playlistUrl, { signal: abortController.signal });
     if (!response.ok) {
       return;
     }

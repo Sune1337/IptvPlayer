@@ -19,6 +19,7 @@ export class SettingsComponent implements OnDestroy {
   public formGroup: FormGroup;
   public playlistUrlControl: FormControl<string | null>;
   public tmdbAccessTokenControl: FormControl<string | null>;
+  public proxyUrlControl: FormControl<string | null>;
 
   // Keep track of subscriptions to clean up when component destroys.
   private ngUnsubscribe = new Subject<void>();
@@ -30,7 +31,8 @@ export class SettingsComponent implements OnDestroy {
     this.formGroup = new FormGroup({
       id: new FormControl<number | undefined>(undefined),
       playlistUrl: this.playlistUrlControl = new FormControl(''),
-      tmdbAccessToken: this.tmdbAccessTokenControl = new FormControl('')
+      tmdbAccessToken: this.tmdbAccessTokenControl = new FormControl(''),
+      proxyUrl: this.proxyUrlControl = new FormControl('')
     });
 
     // Subscript to settings from db.
@@ -40,6 +42,7 @@ export class SettingsComponent implements OnDestroy {
           const accountSettings: AccountSettings = {
             playlistUrl: '',
             tmdbAccessToken: '',
+            proxyUrl: '',
             ...dbAccountSettings
           };
           this.formGroup.setValue(accountSettings);

@@ -73,7 +73,8 @@
               "buildTarget": "iptv-player:build:production"
             },
             "development": {
-              "buildTarget": "iptv-player:build:development"
+              "buildTarget": "iptv-player:build:development",
+              "proxyConfig": "proxy.conf.js"
             }
           },
           "defaultConfiguration": "development"
