@@ -38,7 +38,7 @@
       </p-menubar>
     </div>
 
-    <div #searchResultContainer class="flex-1 search-result-container stop-close-overlay p-2" infinite-scroll [scrollWindow]="false" (scrolled)="whenScrollSearchResult($event)" (click)="hideSidebar()">
+    <div #searchResultContainer class="flex-1 search-result-container stop-close-overlay p-2" infinite-scroll [infiniteScrollDisabled]="componentState.infiniteScrollDisabled" [scrollWindow]="false" (scrolled)="whenScrollSearchResult($event)" (click)="hideSidebar()">
       <div>
         <div class="mb-3 flex flex-wrap">
           <div *ngFor="let genre of componentState.genres" class="channel-checkbox m-1">

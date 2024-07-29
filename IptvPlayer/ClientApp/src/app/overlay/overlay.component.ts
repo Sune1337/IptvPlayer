@@ -23,6 +23,7 @@ interface ComponentState {
   channels: Channel[];
   genres: Genre[];
   searchResult: Title[];
+  infiniteScrollDisabled: boolean;
 }
 
 @Component({
@@ -74,7 +75,7 @@ export class OverlayComponent implements OnDestroy {
   private ngUnsubscribe = new Subject<void>();
 
   /** State variables. */
-  private _componentState: ComponentState = { channels: [], genres: [], searchResult: [], sidebarVisible: false };
+  private _componentState: ComponentState = { channels: [], genres: [], searchResult: [], sidebarVisible: false, infiniteScrollDisabled: false };
   public componentState = new BehaviorSubject<ComponentState>(this._componentState);
 
   constructor(
@@ -123,13 +124,12 @@ export class OverlayComponent implements OnDestroy {
     const filterGenres = this.genreCheckBoxes.filter(cb => cb.checked()).map(cb => cb.value);
 
     this.searchResultOffset = 0;
-    this.pushComponentState({ searchResult: await this.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize) });
+    this.pushComponentState({ infiniteScrollDisabled: true, searchResult: await this.search(terms, filterChannels, filterGenres, this.searchResultOffset, this.searchResultPageSize) });
 
     if (this.searchResultContainer) {
       this.searchResultContainer.nativeElement.scroll({ top: 0, behavior: 'smooth' });
       setTimeout(() => {
-          this.infiniteScroll?.destroyScroller();
-          this.infiniteScroll?.setup();
+          this.pushComponentState({ infiniteScrollDisabled: false });
         }
         // Wait one second so that the smooth scroll finishes scrolling to top before recreating infinite-scroll.
         , 1000);
