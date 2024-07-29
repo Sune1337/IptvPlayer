@@ -46,6 +46,18 @@ internal class CustomTransformer : HttpTransformer
 
         // Remove referrer header so that backend cannot see which site the request is coming from.
         proxyRequest.Headers.Referrer = null;
+        
+        // Remove some http-headers.
+        var headersToDelete = new List<string>();
+        foreach (var header in proxyRequest.Headers)
+        {
+            if (header.Key.StartsWith("X-Forwarded", StringComparison.InvariantCultureIgnoreCase) || header.Key.Equals("Cookie", StringComparison.InvariantCultureIgnoreCase)) headersToDelete.Add(header.Key);
+        }
+
+        foreach (var headerToDelete in headersToDelete)
+        {
+            proxyRequest.Headers.Remove(headerToDelete);
+        }
     }
 
     public override ValueTask<bool> TransformResponseAsync(HttpContext httpContext, HttpResponseMessage? proxyResponse, CancellationToken cancellationToken)
