@@ -81,11 +81,10 @@ export class FullMatch<T> {
   }
 
   private getMinKey = (): any => {
-    let key;
+    let key: any = undefined;
     let firstValue = true;
     for (let index = 0; index < this.lists.length; index++) {
-      // @ts-ignore
-      if (!this.eof[index] && (firstValue || this.keys[index] < key)) {
+      if (!this.eof[index] && (firstValue || this.compareKeys(this.keys[index], key) < 0)) {
         key = this.keys[index];
         firstValue = false;
       }
@@ -95,7 +94,7 @@ export class FullMatch<T> {
   }
 
   private compareKeys(key1: any, key2: any): number {
-    const type = typeof (key1) || typeof (key2);
+    const type = typeof (key1 ?? key2);
     const val1 = key1 == null ? key2 : key1;
     const val2 = key1 == null ? key1 : key2;
     switch (type) {
