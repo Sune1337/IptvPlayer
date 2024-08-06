@@ -58,7 +58,7 @@ export class SyncChannelList {
     const playlistUrl = accountSettings.proxyUrl ? (accountSettings.proxyUrl + accountSettings.playlistUrl) : accountSettings.playlistUrl;
     const response = await fetch(playlistUrl, { signal: abortController.signal });
     if (!response.ok) {
-      return;
+      throw { message: `Error when download playlist: ${response.statusText ?? 'Unknown error'}` };
     }
 
     const playlist = parse(await response.text());
